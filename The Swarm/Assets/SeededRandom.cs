@@ -7,49 +7,53 @@ using Random = System.Random;
 
 public class SeededRandom : MonoBehaviour
 {
-    //private int[] noiseValues;
-
     private void Start()
     {
-        Random random = new Random(0);
-        
-        //noiseValues = new int[5000000];
-        var watch = Stopwatch.StartNew();
+        NonParallelExample();
 
-        Action(random, 1000000);
-        
-        watch.Stop();
-        Debug.Log("Non parallel : " + watch.ElapsedMilliseconds);
-        
-        //noiseValues = new int[1000000];
-        
+        ParallelExample();
+    }
+
+    private static void ParallelExample()
+    {
         var watch1 = Stopwatch.StartNew();
 
-        var parallelCount = 100000;
-        Task[] tasks = {
-            new Task(() => Action(random, parallelCount)),
-            new Task(() => Action(random, parallelCount)),
-            new Task(() => Action(random, parallelCount)),
-            new Task(() => Action(random, parallelCount)),
-            new Task(() => Action(random, parallelCount)),
-            new Task(() => Action(random, parallelCount)),
-            new Task(() => Action(random, parallelCount)),
-            new Task(() => Action(random, parallelCount)),
-            new Task(() => Action(random, parallelCount)),
-            new Task(() => Action(random, parallelCount))
+        const int parallelCount = 100000;
+        Task[] tasks =
+        {
+            new Task(() => Action(new Random(0), parallelCount)),
+            new Task(() => Action(new Random(0), parallelCount)),
+            new Task(() => Action(new Random(0), parallelCount)),
+            new Task(() => Action(new Random(0), parallelCount)),
+            new Task(() => Action(new Random(0), parallelCount)),
+            new Task(() => Action(new Random(0), parallelCount)),
+            new Task(() => Action(new Random(0), parallelCount)),
+            new Task(() => Action(new Random(0), parallelCount)),
+            new Task(() => Action(new Random(0), parallelCount)),
+            new Task(() => Action(new Random(0), parallelCount))
         };
         foreach (var t in tasks)
             t.Start();
         Task.WaitAll(tasks);
-        
+
         watch1.Stop();
         Debug.Log("Parallel whole : " + watch1.ElapsedMilliseconds);
+    }
+
+    private static void NonParallelExample()
+    {
+        var watch = Stopwatch.StartNew();
+
+        const int nonParallelCount = 1000000;
+        Action(new Random(0), nonParallelCount);
+
+        watch.Stop();
+        Debug.Log("Non parallel : " + watch.ElapsedMilliseconds);
     }
 
     private static void Action(Random random, int count)
     {
         var watch1 = Stopwatch.StartNew();
-        //Thread.Sleep(1000);
         for (var i = 0; i < count; i++) 
             random.Next(int.MinValue, int.MaxValue);
         watch1.Stop();
